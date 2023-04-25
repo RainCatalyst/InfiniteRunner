@@ -69,7 +69,7 @@ void APlayerPawn::SwitchLane(int direction)
 	
     // Update current lane
     CurrentLane = newLane;
-    float targetPosition = (CurrentLane - 1) * GameMode->LaneWidth;
+    float targetPosition = GameMode->GetLaneOffset(CurrentLane);
 
     // Move actor
     FVector currentPosition = GetActorLocation();

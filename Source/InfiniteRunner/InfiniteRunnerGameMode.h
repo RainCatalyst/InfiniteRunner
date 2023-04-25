@@ -16,6 +16,8 @@ class AInfiniteRunnerGameMode : public AGameModeBase
 
 public:
 	AInfiniteRunnerGameMode();
+
+	float GetLaneOffset(int laneIndex);
 	
 	UPROPERTY(EditAnywhere)
 	USceneComponent* DefaultRoot;
@@ -28,7 +30,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	float LaneWidth = 250.f;
 	UPROPERTY(EditAnywhere)
-	float LevelSpeed = -500.f;
+	float LevelSpeed = 500.f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FVector OutOfBoundBoxScale = FVector(0.f,0.f,0.f);

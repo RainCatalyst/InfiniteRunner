@@ -19,3 +19,8 @@ AInfiniteRunnerGameMode::AInfiniteRunnerGameMode()
 	LevelBounds = CreateDefaultSubobject<UBoxComponent>(FName("CPPLevelBounds"));
 	LevelBounds->SetupAttachment(DefaultRoot);
 }
+
+float AInfiniteRunnerGameMode::GetLaneOffset(int laneIndex)
+{
+	return (laneIndex - NumberOfLanes / 2) * LaneWidth;
+}
