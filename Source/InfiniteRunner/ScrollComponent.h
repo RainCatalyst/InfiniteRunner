@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "ScrollComponent.generated.h"
 
+class AInfiniteRunnerGameMode;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class INFINITERUNNER_API UScrollComponent : public UActorComponent
@@ -20,9 +21,9 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
+public:
+	UPROPERTY()
+	AInfiniteRunnerGameMode* GameMode;
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
 };

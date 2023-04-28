@@ -1,6 +1,7 @@
 #include "PlayerPawn.h"
 
 #include "InfiniteRunnerGameMode.h"
+#include "Obstacle.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -20,6 +21,7 @@ APlayerPawn::APlayerPawn()
     Mesh->SetupAttachment(RootComponent);
     Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
     Capsule->SetupAttachment(RootComponent);
+	Capsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerPawn::OnOverlapBegin);
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
     SpringArm->SetupAttachment(RootComponent);
@@ -35,10 +37,6 @@ void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	GameMode = Cast<AInfiniteRunnerGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	if(GameMode)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, FString::Printf(TEXT("Theres a mode!")));
-	}
 	
 	CurrentLane = GameMode->NumberOfLanes / 2;
 }
@@ -50,13 +48,11 @@ void APlayerPawn::Tick(float DeltaTime)
 
 void APlayerPawn::MoveRight()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, FString::Printf(TEXT("RIGHT!")));
 	SwitchLane(1);
 }
 
 void APlayerPawn::MoveLeft()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Blue, FString::Printf(TEXT("LEFT!")));
 	SwitchLane(-1);
 }
 
@@ -75,6 +71,16 @@ void APlayerPawn::SwitchLane(int direction)
     FVector currentPosition = GetActorLocation();
     currentPosition.Y = targetPosition;
     SetActorLocation(currentPosition);
+}
+
+void APlayerPawn::OnOverlapBegin(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString::Printf(TEXT("Overlap!")));
+	if (OtherActor->IsA(AObstacle::StaticClass()))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString::Printf(TEXT("Game Over!")));
+		GameMode->RestartPlayer(GetController());
+	}
 }
 
 void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

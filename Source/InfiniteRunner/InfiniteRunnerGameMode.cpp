@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "InfiniteRunnerGameMode.h"
-#include "Components/BoxComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 AInfiniteRunnerGameMode::AInfiniteRunnerGameMode()
@@ -15,9 +14,6 @@ AInfiniteRunnerGameMode::AInfiniteRunnerGameMode()
 
 	DefaultRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Defaultoot"));
 	RootComponent = DefaultRoot;
-
-	LevelBounds = CreateDefaultSubobject<UBoxComponent>(FName("CPPLevelBounds"));
-	LevelBounds->SetupAttachment(DefaultRoot);
 }
 
 float AInfiniteRunnerGameMode::GetLaneOffset(int laneIndex)
