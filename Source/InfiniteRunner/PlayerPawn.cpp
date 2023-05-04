@@ -3,8 +3,6 @@
 #include "InfiniteRunnerGameMode.h"
 #include "Obstacle.h"
 #include "GameFramework/Actor.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/Engine.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -21,14 +19,6 @@ APlayerPawn::APlayerPawn()
     Mesh->SetupAttachment(RootComponent);
     Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
     Capsule->SetupAttachment(RootComponent);
-	Capsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerPawn::OnOverlapBegin);
-
-    SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-    SpringArm->SetupAttachment(RootComponent);
-    SpringArm->TargetArmLength = 800.f;
-
-    Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-    Camera->SetupAttachment(SpringArm);
 
     AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
@@ -37,13 +27,19 @@ void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	GameMode = Cast<AInfiniteRunnerGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	
-	CurrentLane = GameMode->NumberOfLanes / 2;
+	Capsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerPawn::OnOverlapBegin);
 }
 
 void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!Initialised)
+	{
+		Initialised = true;
+		CurrentLane = PlayerIndex == 0 ? 0 : GameMode->NumberOfLanes - 1;
+		UpdatePosition();
+		UE_LOG(LogTemp, Warning, TEXT("Initialised Player Index: %d, Player Lane: %d"), PlayerIndex, CurrentLane);
+	}
 }
 
 void APlayerPawn::MoveRight()
@@ -56,37 +52,61 @@ void APlayerPawn::MoveLeft()
 	SwitchLane(-1);
 }
 
-void APlayerPawn::SwitchLane(int direction)
+void APlayerPawn::AssignIndex(int Index)
+{
+	PlayerIndex = Index;
+	Initialised = false;
+}
+
+int APlayerPawn::GetIndex()
+{
+	return PlayerIndex;
+}
+
+void APlayerPawn::SwitchLane(int Direction)
 {
     // Tries to move the character lane in a direction
-    int newLane = CurrentLane + direction;
+    const int NewLane = CurrentLane + Direction;
     // Check if we are moving within legal limits
-    if (newLane < 0 || newLane > GameMode->NumberOfLanes - 1) return;
+    if (NewLane < 0 || NewLane > GameMode->NumberOfLanes - 1) return;
 	
     // Update current lane
-    CurrentLane = newLane;
-    float targetPosition = GameMode->GetLaneOffset(CurrentLane);
+    CurrentLane = NewLane;
+	UpdatePosition();
+}
 
-    // Move actor
-    FVector currentPosition = GetActorLocation();
-    currentPosition.Y = targetPosition;
-    SetActorLocation(currentPosition);
+void APlayerPawn::UpdatePosition()
+{
+	const float TargetPosition = GameMode->GetLaneOffset(CurrentLane);
+
+	// Move actor to match the lane position
+	FVector CurrentPosition = GetActorLocation();
+	CurrentPosition.Y = TargetPosition;
+	SetActorLocation(CurrentPosition);
 }
 
 void APlayerPawn::OnOverlapBegin(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString::Printf(TEXT("Overlap!")));
+	// If we've hit an obstacle
 	if (OtherActor->IsA(AObstacle::StaticClass()))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString::Printf(TEXT("Game Over!")));
-		GameMode->RestartPlayer(GetController());
+		if (OtherComp->ComponentTags.Num() > 0)
+		{
+			if (OtherComp->ComponentTags[0] == TEXT("Hit"))
+			{
+				// Hit the actual obstacle
+				OnObstacleHit(Cast<AObstacle>(OtherActor));
+			}
+			else if (OtherComp->ComponentTags[0] == TEXT("Dodge"))
+			{
+				// Hit the "dodge" hitbox
+				OnObstacleDodged(Cast<AObstacle>(OtherActor));
+			}
+		}
 	}
 }
 
 void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("MoveLeft", IE_Pressed, this, &APlayerPawn::MoveLeft);
-	PlayerInputComponent->BindAction("MoveRight", IE_Pressed, this, &APlayerPawn::MoveRight);
 }
