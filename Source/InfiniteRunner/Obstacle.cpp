@@ -1,40 +1,40 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Obstacle.h"
-#include "Components/BoxComponent.h"
 
-// Sets default values
 AObstacle::AObstacle()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	NextObstacle = nullptr;
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	SetRootComponent(SceneRoot);
-	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Capsule"));
-	Collision->SetupAttachment(RootComponent);
-	Collision->OnComponentBeginOverlap.AddDynamic(this, &AObstacle::OnOverlapBegin);
 }
 
-// Called when the game starts or when spawned
+void AObstacle::Remove()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Destroying self"));
+	Destroy();
+}
+
+void AObstacle::RemoveNext()
+{
+	if (NextObstacle)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Removing next"));
+		NextObstacle->Remove();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Removing next"));
+	}
+}
+
+void AObstacle::SetNext(AObstacle* Next)
+{
+	NextObstacle = Next;
+}
+
 void AObstacle::BeginPlay()
 {
 	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void AObstacle::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString::Printf(TEXT("Hey!")));
-
-}
-
-void AObstacle::OnOverlapBegin(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString::Printf(TEXT("Overlap!")));
 }
 

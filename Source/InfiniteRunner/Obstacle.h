@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,6 +6,7 @@
 
 class UBoxComponent;
 
+/** Base class for all obstacles in the game **/
 UCLASS()
 class INFINITERUNNER_API AObstacle : public AActor
 {
@@ -17,13 +16,19 @@ public:
 	// Sets default values for this actor's properties
 	AObstacle();
 
-	virtual void Tick(float DeltaTime) override;
-	UFUNCTION()
-	void OnOverlapBegin(class UPrimitiveComponent* HitComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	UFUNCTION(BlueprintCallable)
+	void Remove();
+	UFUNCTION(BlueprintCallable)
+	void RemoveNext();
+	UFUNCTION(BlueprintCallable)
+	void SetNext(AObstacle* Next);
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY()
+	AObstacle* NextObstacle;
 
 private:
 	UPROPERTY(VisibleAnywhere)
