@@ -4,15 +4,12 @@
 #include "InfiniteRunnerGameMode.h"
 #include "Kismet/GameplayStatics.h"
 
-// Sets default values
 AObjectSpawner::AObjectSpawner()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	CurrentDistance = 0;
 }
 
-// Called when the game starts or when spawned
 void AObjectSpawner::BeginPlay()
 {
 	Super::BeginPlay();
@@ -29,7 +26,12 @@ void AObjectSpawner::Tick(float DeltaTime)
 	if (CurrentDistance > SpawnDistance)
 	{
 		CurrentDistance -= SpawnDistance;
-		GetWorld()->SpawnActor<AActor>(SpawnableObject[FMath::RandRange(0, SpawnableObject.Num() - 1)], GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
+		if (FMath::FRandRange(0, 1) < SpawnChance)
+		{
+			// Call a BP event
+			OnSpawn();
+			// GetWorld()->SpawnActor<AActor>(SpawnableObjects[FMath::RandRange(0, SpawnableObjects.Num() - 1)], GetActorLocation(), GetActorRotation(), FActorSpawnParameters());
+		}
 	}
 }
 

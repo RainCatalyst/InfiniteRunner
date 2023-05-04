@@ -1,3 +1,4 @@
+// Responsible for spawn
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,23 +13,25 @@ class INFINITERUNNER_API AObjectSpawner : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AObjectSpawner();
-	
-	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<AActor>> SpawnableObject;
-	UPROPERTY(EditAnywhere)
-	float SpawnDistance;
 	
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-private:
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSpawn();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TSubclassOf<AActor>> SpawnableObjects;
+	UPROPERTY(EditAnywhere)
+	float SpawnDistance;
+	UPROPERTY(EditAnywhere)
+	float SpawnChance;
+	
 	UPROPERTY()
 	AInfiniteRunnerGameMode* GameMode;
-
+private:
 	float CurrentDistance;
 };
