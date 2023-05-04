@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,6 +6,7 @@
 
 class AInfiniteRunnerGameMode;
 
+/** Moves the owner with the level **/
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class INFINITERUNNER_API UScrollComponent : public UActorComponent
 {

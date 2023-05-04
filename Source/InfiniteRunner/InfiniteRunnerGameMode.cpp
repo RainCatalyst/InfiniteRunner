@@ -26,7 +26,8 @@ void AInfiniteRunnerGameMode::Tick(float DeltaTime)
 	LevelSpeed += LevelAcceleration * DeltaTime;
 }
 
-float AInfiniteRunnerGameMode::GetLaneOffset(int laneIndex)
+float AInfiniteRunnerGameMode::GetLaneOffset(int LaneIndex)
 {
-	return (laneIndex - NumberOfLanes / 2) * LaneWidth;
+	// Return the expected player (or obstacle) position based on the lane index
+	return (LaneIndex - NumberOfLanes / 2) * LaneWidth;
 }

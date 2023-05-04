@@ -19,7 +19,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	float GetLaneOffset(int laneIndex);
+	float GetLaneOffset(int LaneIndex);
 	
 	UPROPERTY(EditAnywhere)
 	USceneComponent* DefaultRoot;
